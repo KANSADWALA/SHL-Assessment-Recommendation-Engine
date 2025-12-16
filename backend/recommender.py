@@ -384,6 +384,92 @@ class AssessmentRecommender:
         results.sort(key=lambda x: x['total_score'], reverse=True)
         return results[:top_k]
     
+    def validate_recommendations(self, user_id, role='', level='', 
+                                     industry='', goal='', query='', top_k=10):
+        """
+        Get recommendations with validation and quality checks.
+        
+        Returns a dict with:
+        - recommendations: list of recommendations
+        - quality: 'high', 'medium', 'low', or 'no_match'
+        - message: user-facing message about results
+        - suggestions: list of suggestions to improve results
+        """
+        
+        # Get raw recommendations
+        recommendations = self.get_advanced_recommendations(
+            user_id=user_id,
+            role=role,
+            level=level,
+            industry=industry,
+            goal=goal,
+            query=query,
+            top_k=top_k
+        )
+        
+        # Analyze recommendation quality
+        if not recommendations:
+            return {
+                'recommendations': [],
+                'quality': 'no_match',
+                'message': 'No relevant assessments found for the selected criteria.',
+                'suggestions': [
+                    "Try adjusting role, level, goal, or provide a clearer description.",
+                    'Use more general terms in your description'
+                ]
+            }
+        
+        # Check score distribution
+        top_score = recommendations[0]['match_percentage']
+        avg_top_3 = sum(r['match_percentage'] for r in recommendations[:3]) / min(3, len(recommendations))
+        
+        # Determine quality and craft message
+        if top_score >= 70 and avg_top_3 >= 60:
+            quality = 'high'
+            message = f"Found {len(recommendations)} excellent matches for your criteria!"
+            suggestions = []
+            
+        elif top_score >= 50 and avg_top_3 >= 40:
+            quality = 'medium'
+            message = f"Found {len(recommendations)} assessments."
+            suggestions = []
+            # suggestions = [s for s in suggestions if s]  # Remove None values
+            
+        elif top_score >= 30:
+            quality = 'low'
+            message = "We found some assessments, but they may not be a perfect fit."
+            suggestions = [
+                'Try different role or industry selections',
+                'Use simpler, more common terms in your description',
+                'Remove very specific requirements to see more options',
+                'Consider browsing all assessments in a category'
+            ]
+            
+        else:
+            quality = 'no_match'
+            message = "No strong matches found for your current criteria."
+            suggestions = [
+                'Try selecting different options from the dropdowns',
+                'Use more general terms (e.g., "leadership skills" instead of specific job titles)',
+                'Clear some filters to see broader results',
+                'Check if your description contains typos or very specific jargon'
+            ]
+            
+            # Only return top recommendations if quality is very low
+            recommendations = recommendations[:3]
+        
+        return {
+            'recommendations': recommendations,
+            'quality': quality,
+            'message': message,
+            'suggestions': suggestions,
+            'metadata': {
+                'top_score': top_score,
+                'avg_score': avg_top_3,
+                'total_found': len(recommendations)
+            }
+        }
+    
     def _load_persisted_data(self):
         """Load recent feedback and persisted state from the database.
 

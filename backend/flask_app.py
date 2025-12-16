@@ -10,7 +10,6 @@ from prometheus_flask_exporter import PrometheusMetrics
 from datetime import datetime
 import uuid
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 import os
 
@@ -35,22 +34,6 @@ app = Flask(
 # Load configuration
 app.config.from_object(Config)
 
-# Thread pool for background tasks
-executor = ThreadPoolExecutor(max_workers=2)
-
-# Run expensive similarity calculations in background
-def async_update_similarities():
-    """Run expensive similarity calculations in background"""
-    def _update():
-        try:
-            assessment_recommender._compute_item_similarities()
-            assessment_recommender._update_popular_items()
-            logger.info("Background update completed")
-        except Exception as e:
-            logger.error(f"Background update failed: {e}")
-    
-    executor.submit(_update)
-
 # Rate limiting
 limiter = Limiter(
     app=app,
@@ -61,11 +44,6 @@ limiter = Limiter(
 
 # Prometheus metrics
 metrics = PrometheusMetrics(app)
-
-recommendation_counter = metrics.counter(
-    'recommendations_total', 'Total recommendations served',
-    labels={'user_type': lambda: 'new' if session.get('is_new_user') else 'returning'}
-)
 
 # Secret key for sessions
 app.secret_key = Config.SECRET_KEY
@@ -209,7 +187,7 @@ def validate_recommendation_request(f):
 @limiter.limit("30 per minute")
 @validate_recommendation_request 
 def recommend():
-    """Get recommendations"""
+    """Get recommendations with quality validation"""
     try:
         data = request.json or {}
         
@@ -233,7 +211,8 @@ def recommend():
                 session['user_id'] = str(uuid.uuid4())
             user_id = session['user_id']
         
-        recommendations = assessment_recommender.get_advanced_recommendations(
+        # Get validated recommendations
+        result = assessment_recommender.validate_recommendations(
             user_id=user_id,
             role=role,
             level=level,
@@ -241,9 +220,10 @@ def recommend():
             goal=goal,
             query=query,
             top_k=data.get('top_k', 10)
-         )
+        )
         
-        for rec in recommendations[:3]:
+        # Record views for top recommendations
+        for rec in result['recommendations'][:3]:
             assessment_recommender.record_interaction(
                 user_id=user_id,
                 assessment_id=rec['assessment']['id'],
@@ -255,7 +235,11 @@ def recommend():
         return jsonify({
             'status': 'success',
             'user_id': user_id,
-            'recommendations': recommendations
+            'recommendations': result['recommendations'],
+            'quality': result['quality'],
+            'message': result['message'],
+            'suggestions': result['suggestions'],
+            'metadata': result.get('metadata', {})
         })
     except Exception as e:
         logger.exception("Recommendation error")
