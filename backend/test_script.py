@@ -5,7 +5,6 @@ interactions, and score progression with detailed verification.
 """
 
 import requests
-import json
 import time
 from typing import Dict, List
 

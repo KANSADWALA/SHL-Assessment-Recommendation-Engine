@@ -15,8 +15,8 @@ from functools import wraps
 import os
 
 # Local imports
-from config import Config, BASE_DIR
-from recommender import AssessmentRecommender
+from backend.config import Config, BASE_DIR
+from backend.recommender import AssessmentRecommender
 
 # Configure logging
 logging.basicConfig(

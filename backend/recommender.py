@@ -10,8 +10,8 @@ from functools import lru_cache
 from threading import Lock
 
 # Local imports
-from config import Config, ASSESSMENTS
-from database import DatabasePersistence
+from backend.config import Config, ASSESSMENTS
+from backend.database import DatabasePersistence
 
 # Configure logging
 logging.basicConfig(
