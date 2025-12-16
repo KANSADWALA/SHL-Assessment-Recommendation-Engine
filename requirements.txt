@@ -1,0 +1,17 @@
+# Core Flask Framework
+Flask==3.0.2
+flask-cors==5.0.1
+flask-limiter==4.1.1
+
+# Data Science & Machine Learning
+numpy==1.26.4
+scikit-learn==1.5.1
+
+# Monitoring & Metrics
+prometheus-flask-exporter==0.23.2
+
+# HTTP & Networking
+requests==2.32.3
+
+# Configuration Management
+python-dotenv==1.0.1
