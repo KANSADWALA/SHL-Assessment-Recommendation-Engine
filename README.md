@@ -4,6 +4,10 @@
 
 The SHL Assessment Recommendation Engine is a designed to help individuals discover the most suitable assessment tools from SHL's product catalogue . The system combines multiple recommendation techniques including content-based filtering, collaborative filtering, and adaptive learning to provide personalized, high-quality recommendations. It learns from user interactions and feedback to continuously improve recommendation quality over time.
 
+- The application is deployed on the Render platform. 
+
+🚀 Live Link: https://shl-assessment-recommendation-engine-cuaa.onrender.com/
+
 ## 🌟 Key Features
 
 ### 1. Intelligent Recommendation System
