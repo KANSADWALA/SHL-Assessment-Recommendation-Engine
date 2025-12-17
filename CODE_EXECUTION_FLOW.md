@@ -7,6 +7,11 @@
 4. [Feedback & Learning Loop](#4-feedback--learning-loop)
 5. [Database Operations](#5-database-operations)
 6. [Maintenance & Cleanup](#6-maintenance--cleanup)
+7. [Complete Request-Response Cycle Example](#7-complete-request-response-cycle-example)
+8. [Key Data Flow Diagrams](#8-key-data-flow-diagrams)
+9. [Performance Optimizations](#9-performance-optimizations)
+10. [Error Handling](#10-error-handling)
+11. [Testing & Verification (test_script.py)](#11-testing--verification-test_scriptpy)
 
 ---
 
