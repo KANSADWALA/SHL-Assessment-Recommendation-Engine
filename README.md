@@ -119,10 +119,12 @@ Scores are normalized using sigmoid function for better distribution and convert
  Recommendation_Engine/
     │
     ├── backend/
+    │ ├── init.py               # Marks backend as a Python package
     │ ├── flask_app.py          # Flask application entry point
     │ ├── recommender.py        # Recommendation logic 
     │ ├── database.py           # SQLite database operations
-    │ └── config.py             # Application configuration
+    │ ├── config.py             # Application configuration
+    │ └── test_script.py        # External testing and validation
     │
     ├── frontend/
     │ ├── templates/
